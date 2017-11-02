@@ -1,0 +1,76 @@
+[Package]
+version: 1
+depends: 
+incremental: False
+
+[Product]
+type: localboot
+id: dfn_qgis
+name: QGIS
+description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
+advice: 
+version: 2.18.14
+priority: 0
+licenseRequired: False
+productClasses: 
+setupScript: setup64.opsiscript
+uninstallScript: uninstall64.opsiscript
+updateScript: 
+alwaysScript: 
+onceScript: 
+customScript: 
+userLoginScript: login.opsiscript
+
+[ProductProperty]
+type: bool
+name: desktop-link
+description: Link on Desktop?
+default: False
+
+[ProductProperty]
+type: bool
+name: show-tips
+description: Show tips when QGIS is started?
+default: False
+
+[ProductProperty]
+type: unicode
+name: custom-post-install
+multivalue: False
+editable: False
+description: Define filename for include script in custom directory after installation
+values: ["none", "post-install.opsiinc"]
+default: ["none"]
+
+[ProductProperty]
+type: unicode
+name: custom-post-deinstall
+multivalue: False
+editable: False
+description: Define filename for include script in custom directory after deinstallation
+values: ["none", "post-deinstall.opsiinc"]
+default: ["none"]
+
+[Changelog]
+dfn_qgis(2.18.14-1)
+	* neue Upstreamversion
+	* Logo gem. o4i-Richtlinie
+	* 64-Bit-Check: error statt warning
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 02.11.2017
+
+dfn_qgis(2.18.13-1)
+	* neue Version gepackt
+ -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 23.10.2017
+
+dfn_qgis(2.18.12-1)
+	* Fixes und neue Version gepackt
+ -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 19.10.2017
+
+
+
+
+
+
+
+
+

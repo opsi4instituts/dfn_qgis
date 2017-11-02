@@ -1,0 +1,29 @@
+[Actions]
+Message "Profile Patch for QGIS ...."
+
+if getValue("installationstate", getProductMap) = "installed"
+
+	comment "Product is installed"
+	if not (GetRegistryStringValue64("[HKEY_CURRENT_USER\Software\QGIS\QGIS2\Qgis] checkVersion") = "false")
+		comment "version is set to be checked"
+		Registry_currentuser_set_versioncheck
+	endif
+	
+	DefVar $ShowTips$
+	Set $ShowTips$ = getProductProperty("show-tips","false")
+	if ($ShowTips$ = "false")
+		if not (GetRegistryStringValue64("[HKEY_CURRENT_USER\Software\QGIS\QGIS2\Qgis] showTips218") = "false")
+			comment "tips are set to be shown"
+			Registry_currentuser_set_showtips
+		endif
+	endif
+	
+endif
+
+[Registry_currentuser_set_versioncheck]
+openkey [HKEY_CURRENT_USER\Software\QGIS\QGIS2\Qgis]
+set "checkVersion" = REG_SZ:"false"
+
+[Registry_currentuser_set_showtips]
+openkey [HKEY_CURRENT_USER\Software\QGIS\QGIS2\Qgis]
+set "showTips218" = REG_SZ:"false"

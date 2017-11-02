@@ -1,0 +1,81 @@
+requiredWinstVersion >= "4.11.4.3"
+
+Defvar $AltProductName$
+DefVar $AltSearchPattern$
+DefVar $CustomPostDeinstall$
+DefVar $CustomPostInstall$
+DefVar $DesktopLink$
+DefVar $DirForGrassVersion$
+DefVar $ErrorMsg$
+DefVar $ExitCode$
+DefVar $GGISShortcutName$
+DefVar $InstFile$
+DefVar $InstSystemType$
+DefVar $InstallDir$
+DefVar $InstalledGGISVersion$
+DefVar $InstalledProductVersion$
+DefVar $LogDir$
+DefVar $MajorProductVersion$
+DefVar $MinimumSpace$
+DefVar $MSVersion$
+DefVar $PathToGGIS$
+DefVar $PathToQGIS$
+DefVar $PathToSGIS$
+DefVar $ProductId$
+DefVar $ProductName$
+DefVar $ProductVersion$
+DefVar $QGISShortcutName$
+DefVar $RegId$
+DefVar $RegPathUninstall$
+DefVar $RegPathInfo$
+DefVar $SearchPattern$
+DefVar $SearchRegPath$
+DefVar $UninstallProgram$
+DefVar $VersionSubFilePath$
+DefStringList $InstallDirs$
+DefStringlist $ResultList32$
+DefStringlist $ResultList64$
+
+include_append "section_sub_check_exitcode.opsiinc"
+include_append "section_sub_search_registry32_keys.opsiinc"
+include_append "section_sub_search_registry64_keys.opsiinc"
+
+Set $InstSystemType$ = GetSystemType
+Set $MSVersion$	 = GetMsVersionInfo
+Set $LogDir$ = "%opsiLogDir%"
+
+; entfernt die Paketversionsnummer von der Gesamtversionsnummer
+Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"))
+
+Set $DesktopLink$ = getProductProperty("desktop-link","false")
+
+; ---------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------
+Set $ProductId$		= "dfn_qgis"
+Set $ProductName$       = "QGIS"
+Set $AltProductName$    = "Quantum GIS"
+Set $MinimumSpace$	= "1600 MB"
+Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+Set $RegPathInfo$       = "HKEY_LOCAL_MACHINE\SOFTWARE"
+Set $InstFile$		= "QGIS-OSGeo4W-" + $ProductVersion$ + "-1-Setup-x86_64.exe"
+; ---------------------------------------------------------------------------------
+; ---------------------------------------------------------------------------------
+
+setloglevel = 6
+
+if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
+	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer if installation was successful on other windows versions."		
+endif
+if not ($InstSystemType$ = "64 Bit System")
+	LogError "There is no 32 bit version included in this packet!"
+	isFatalError
+endif
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+       comment "logo at local library/icons found."
+       ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+       comment "no logo at local library/icons, use from ScriptPath ..."
+       ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+endif

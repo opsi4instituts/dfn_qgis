@@ -1,0 +1,94 @@
+; Parameter: $SearchPattern$: Suchbegriff in Registry
+;	     $AltSearchPattern$: alternativer zweiter Suchbegriff, wenn unbenutzt gleich "" definieren
+;            $SearchRegPath$: Wo in der Registry zu suchen ist
+; Sucht die 64 und die 32 bit Registry nach einer Installation durch
+; Rückgabewerte: $ResultList32$ gefundene 32bit Einträge
+; 		 $ResultList64$ gefundene 64bit Einträge
+Set $SearchPattern$ = $ProductName$
+Set $AltSearchPattern$ = $AltProductName$
+Set $SearchRegPath$ = $RegPathUninstall$
+Sub_search_registry32_keys
+Sub_search_registry64_keys
+
+if (count($ResultList32$) = "0") AND (count($ResultList64$) = "0")
+	comment "No installations of " + $SearchPattern$ + " found in registry"
+else
+	if (count($ResultList32$) = "1")
+		comment "Found one installation of " + $SearchPattern$ + " in the 32-bit registry, try to deinstall"
+		Set $RegId$ = takeString(0, $ResultList32$)
+		Set $UninstallProgram$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+		Set $InstallDir$ = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
+		Set $InstalledProductVersion$  = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
+		Sub_uninstall
+	endif
+	if (count($ResultList32$) > "1")
+		logError "Found more than one installation in the 32bit registry, there is something wrong."
+		isFatalError
+	endif
+	if (count($ResultList64$) = "1")
+		comment "Found one installation of " + $SearchPattern$ + " in the 64-bit registry, try to deinstall"
+		Set $RegId$ = takeString(0, $ResultList64$)
+		Set $UninstallProgram$ = GetRegistryStringValue64("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+		Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
+		Set $InstalledProductVersion$  = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
+		Sub_uninstall
+	endif
+	if (count($ResultList64$) > "1")
+		logError "Found more than one installation in the 64bit registry, there is something wrong."
+		isFatalError	
+	endif
+endif
+
+[Sub_uninstall]
+Winbatch_uninstall
+sub_check_exitcode
+
+comment "include custom post install file"
+set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")
+if not ($CustomPostDeinstall$ = "none")
+	if FileExists("%ScriptPath%\custom\" + $CustomPostDeinstall$)
+		include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
+	endif
+endif
+
+if $DesktopLink$ = "true"
+	comment "deleting desktop icons"
+	; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
+	Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
+	Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
+	
+	; speichert die ersten zwei Nummern der Produktversion
+	Set $MajorProductVersion$ = composeString (createStringList (takestring (0, splitString($InstalledProductVersion$, ".")), takestring (1, splitString($InstalledProductVersion$, "."))), ".")
+	
+	; die Namen der Verknüpfungen werden hier definiert da die String-Konkatenation in der Linkfolder Section nicht funktioniert
+	Set $GGISShortcutName$ = "GRASS GIS " + $InstalledGGISVersion$
+	Set $QGISShortcutName$ = "QGIS " + $MajorProductVersion$
+	Linkfolder_deleteDesktopIcons
+endif
+	
+; da der Installer die Registry nicht aufräumt muss dies Manuell erledigt weden
+Registry_uninstall
+	
+; das Skript muss kurz warten, da sonst das Löschen der Dateien fehlschlägt
+sleepSeconds 120
+
+; löscht vorhandene Überbleibsel des Programmes
+if (Fileexists($InstallDir$))
+	Files_uninstall
+endif
+
+[Winbatch_uninstall]
+"$UninstallProgram$" /S
+
+[Files_uninstall]
+del -sf $InstallDir$
+
+[Registry_uninstall]
+deletekey [$RegPathUninstall$\$RegId$]
+
+[Linkfolder_deleteDesktopIcons]
+set_basefolder common_desktopdirectory
+set_subfolder ""
+delete_element "OSGeo4W Shell"
+delete_element $GGISShortcutName$
+delete_subfolder $QGISShortcutName$

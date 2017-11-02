@@ -1,0 +1,112 @@
+[Actions]
+; common Values for (un)installation
+include_insert "common.opsiinc"
+
+if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
+	LogError "Not enough space on %SystemDrive%, " + $MinimumSpace$ + " on drive %SystemDrive% needed for " + $ProductId$
+	; Stop process and set installation status to failed	
+	isFatalError
+else
+	comment "Show product picture"
+	ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+	
+	if FileExists("%ScriptPath%\delsub64.opsiscript")
+		comment "Start uninstall sub section"
+		Sub "%ScriptPath%\delsub64.opsiscript"
+	endif
+
+	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
+	comment "Starting the setup program"
+	Winbatch_install
+	sub_check_exitcode
+
+	comment "Test for installation success"
+
+	; Parameter: $SearchPattern$: Suchbegriff in Registry
+	;	     $AltSearchPattern$: alternativer zweiter Suchbegriff, wenn unbenutzt gleich "" definieren
+	;            $SearchRegPath$: Wo in der Registry zu suchen ist
+	; Sucht die 64 und die 32 bit Registry nach einer Installation durch
+	; Rückgabewerte: $ResultList32$ gefundene 32bit Einträge
+	; 		 $ResultList64$ gefundene 64bit Einträge
+	Set $SearchPattern$ = $ProductName$
+	Set $AltSearchPattern$ = $AltProductName$
+	Set $SearchRegPath$ = $RegPathUninstall$
+	Sub_search_registry32_keys
+	Sub_search_registry64_keys
+
+	if (count($ResultList32$) = "0") AND (count($ResultList64$) = "0")
+		comment "No installations of " + $SearchPattern$ + " found in registry"
+	else
+		if (count($ResultList32$) = "1")
+			Set $RegId$ = takeString(0, $ResultList32$)
+			Set $InstallDir$ = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
+			Set $InstalledProductVersion$  = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
+			Sub__install
+		endif
+		if (count($ResultList32$) > "1")
+			logError "Found more than one installation in the 32bit registry, there is something wrong."
+			isFatalError
+		endif
+		if (count($ResultList64$) = "1")
+			Set $RegId$ = takeString(0, $ResultList64$)
+			Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
+			Set $InstalledProductVersion$  = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
+			Sub__install
+		endif
+		if (count($ResultList64$) > "1")
+			logError "Found more than one installation in the 64bit registry, there is something wrong."
+			isFatalError	
+		endif
+	endif
+endif
+
+[Sub__install]
+; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
+Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
+Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
+
+; der Pfad zu den ausführbaren Dateien hängt von der Grass GIS Version ab
+Set $PathToGGIS$ = $InstallDir$ + "\bin\grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + takestring(1, splitString($InstalledGGISVersion$, ".")) + ".bat"
+Set $PathToQGIS$ = $InstallDir$ + "\bin\qgis-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
+Set $PathToSGIS$ = $InstallDir$ + "\apps\saga-ltr\saga_gui.exe"
+
+; verifiziert ob die Produktversion mit der installierten Version übereinstimmt
+if not ($InstalledProductVersion$ = $ProductVersion$)
+	logError "Fatal: Installed product version is " + $InstalledProductVersion$ + " but is supposed to be " + $ProductVersion$
+	isFatalError
+endif
+
+if $DesktopLink$ = "false"
+	comment "deleting desktop icons"
+	; speichert die ersten zwei Nummern der Produktversion
+	Set $MajorProductVersion$ = composeString (createStringList (takestring (0, splitString($InstalledProductVersion$, ".")), takestring (1, splitString($InstalledProductVersion$, "."))), ".")
+	
+	; die Namen der Verknüpfungen werden hier definiert da die String-Konkatenation in der Linkfolder Section nicht funktioniert
+	Set $GGISShortcutName$ = "GRASS GIS " + $InstalledGGISVersion$
+	Set $QGISShortcutName$ = "QGIS " + $MajorProductVersion$
+	Linkfolder_deleteDefaultDesktopIcons
+endif
+
+comment "include custom post install file"
+set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+if not ($CustomPostInstall$ = "none")
+	if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+		include_insert "%ScriptPath%\custom\" + $CustomPostInstall$	
+	endif
+endif
+
+[Winbatch_install]
+;NSIS Installer
+"%ScriptPath%\$InstFile$" /S
+
+[DosInAnIcon_get_path]
+@echo off
+dir %1 /B
+pause
+
+[Linkfolder_deleteDefaultDesktopIcons]
+set_basefolder common_desktopdirectory
+set_subfolder ""
+delete_element "OSGeo4W Shell"
+delete_element $GGISShortcutName$
+delete_subfolder $QGISShortcutName$

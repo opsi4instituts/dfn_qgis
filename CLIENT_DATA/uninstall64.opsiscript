@@ -1,0 +1,20 @@
+[Actions]
+; common values for (un)installation
+include_insert "common.opsiinc"
+
+comment "Show product picture"
+	ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
+
+Message "Uninstalling " + $ProductName$ + " ..."
+
+if FileExists("%ScriptPath%\delsub64.opsiscript")
+	comment "Start uninstall sub section"
+	Sub "%ScriptPath%\delsub64.opsiscript"
+endif
+
+; diese Section befindet sich hier wegen einem bekanntem Bug wegen dessen getOutStreamFromSection mit in
+; Subs definierten Sections nicht funktioniert
+[DosInAnIcon_get_path]
+@echo off
+dir %1 /B
+pause
