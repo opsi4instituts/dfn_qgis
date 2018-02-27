@@ -41,7 +41,7 @@ else
 			Set $RegId$ = takeString(0, $ResultList32$)
 			Set $InstallDir$ = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
 			Set $InstalledProductVersion$  = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
-			Sub__install
+			Sub_install
 		endif
 		if (count($ResultList32$) > "1")
 			logError "Found more than one installation in the 32bit registry, there is something wrong."
@@ -51,7 +51,7 @@ else
 			Set $RegId$ = takeString(0, $ResultList64$)
 			Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
 			Set $InstalledProductVersion$  = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
-			Sub__install
+			Sub_install
 		endif
 		if (count($ResultList64$) > "1")
 			logError "Found more than one installation in the 64bit registry, there is something wrong."
@@ -60,7 +60,7 @@ else
 	endif
 endif
 
-[Sub__install]
+[Sub_install]
 ; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
 Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
 Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
@@ -102,7 +102,6 @@ endif
 [DosInAnIcon_get_path]
 @echo off
 dir %1 /B
-pause
 
 [Linkfolder_deleteDefaultDesktopIcons]
 set_basefolder common_desktopdirectory
