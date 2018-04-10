@@ -65,10 +65,12 @@ endif
 Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
 Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
 
-; der Pfad zu den ausführbaren Dateien hängt von der Grass GIS Version ab
-Set $PathToGGIS$ = $InstallDir$ + "\bin\grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + takestring(1, splitString($InstalledGGISVersion$, ".")) + ".bat"
-Set $PathToQGIS$ = $InstallDir$ + "\bin\qgis-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
-Set $PathToSGIS$ = $InstallDir$ + "\apps\saga-ltr\saga_gui.exe"
+; der Pfad zu QGIS ändert sich wenn es eine LTR-Version ist
+if FileExists($InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat")
+	Set $PathToExe$ = $InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
+else
+	Set $PathToExe$ = $InstallDir$ + "\bin\qgis-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
+endif
 
 ; verifiziert ob die Produktversion mit der installierten Version übereinstimmt
 if not ($InstalledProductVersion$ = $ProductVersion$)

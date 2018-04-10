@@ -18,9 +18,7 @@ DefVar $LogDir$
 DefVar $MajorProductVersion$
 DefVar $MinimumSpace$
 DefVar $MSVersion$
-DefVar $PathToGGIS$
-DefVar $PathToQGIS$
-DefVar $PathToSGIS$
+DefVar $PathToExe$
 DefVar $ProductId$
 DefVar $ProductName$
 DefVar $ProductVersion$
@@ -67,7 +65,7 @@ if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer if installation was successful on other windows versions."		
 endif
 if not ($InstSystemType$ = "64 Bit System")
-	LogError "There is no 32 bit version included in this packet!"
+	LogError "There is no 32 bit version included in this package!"
 	isFatalError
 endif
 

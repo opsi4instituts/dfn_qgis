@@ -9,7 +9,7 @@ id: dfn_qgis
 name: QGIS
 description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
 advice: 
-version: 2.18.17
+version: 2.18.18
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -52,6 +52,14 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_qgis(2.18.18-1)
+	* neue Upstreamversion
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 10.04.2018
+
+dfn_qgis(2.18.17-2)
+	* bei der Pfadermittlung wird nun automatisch erkannt ob es sich um eine normale oder LTR Version handelt
+ -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 09.04.2018
+
 dfn_qgis(2.18.17-1)
 	* neue Upstreamversion (Long-Term-Release = LTR)
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 27.02.2018
