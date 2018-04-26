@@ -9,7 +9,7 @@ id: dfn_qgis
 name: QGIS
 description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
 advice: 
-version: 2.18.18
+version: 2.18.19
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -52,6 +52,10 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_qgis(2.18.19-1)
+	* neue Upstreamversion
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 26.04.2018
+
 dfn_qgis(2.18.18-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 10.04.2018
