@@ -18,82 +18,63 @@ else
 	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
 	comment "Starting the setup program"
 	Winbatch_install
-	sub_check_exitcode
+	Set $ExitCode$ = getLastExitCode
+	if stringToBool(isNsisExitcodeFatal($ExitCode$, "True", $ErrorString$))
+		isFatalError
+	endif
 
 	comment "Test for installation success"
 
-	; Parameter: $SearchPattern$: Suchbegriff in Registry
-	;	     $AltSearchPattern$: alternativer zweiter Suchbegriff, wenn unbenutzt gleich "" definieren
-	;            $SearchRegPath$: Wo in der Registry zu suchen ist
-	; Sucht die 64 und die 32 bit Registry nach einer Installation durch
-	; Rückgabewerte: $ResultList32$ gefundene 32bit Einträge
-	; 		 $ResultList64$ gefundene 64bit Einträge
-	Set $SearchPattern$ = $ProductName$
-	Set $AltSearchPattern$ = $AltProductName$
-	Set $SearchRegPath$ = $RegPathUninstall$
-	Sub_search_registry32_keys
-	Sub_search_registry64_keys
+	; Ergebnis ist StringList (mehrere Einträge möglich);
+	; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+	; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+	Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
 
-	if (count($ResultList32$) = "0") AND (count($ResultList64$) = "0")
-		comment "No installations of " + $SearchPattern$ + " found in registry"
+	if (count($ResultList$) = "0")
+		comment "No installations of " + $ProductName$ + " found in registry"
 	else
-		if (count($ResultList32$) = "1")
-			Set $RegId$ = takeString(0, $ResultList32$)
-			Set $InstallDir$ = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
-			Set $InstalledProductVersion$  = GetRegistryStringValue32("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
-			Sub_install
+		Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+		Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
+
+		Set $UninstallProgram$ = GetRegistryValue($RegId$, "UninstallString", $RegBitScope$)
+		Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
+		Set $InstalledVersion$ = GetRegistryValue($RegId$, "DisplayVersion", $RegBitScope$)
+
+		; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
+		Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
+		Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
+
+		; der Pfad zu QGIS ändert sich wenn es eine LTR-Version ist
+		if FileExists($InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat")
+			Set $PathToExe$ = $InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
+		else
+			Set $PathToExe$ = $InstallDir$ + "\bin\qgis-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
 		endif
-		if (count($ResultList32$) > "1")
-			logError "Found more than one installation in the 32bit registry, there is something wrong."
+
+		; verifiziert ob die Produktversion mit der installierten Version übereinstimmt
+		if not ($InstalledVersion$ = $ProductVersion$)
+			logError "Fatal: Installed product version is " + $InstalledVersion$ + " but is supposed to be " + $ProductVersion$
 			isFatalError
 		endif
-		if (count($ResultList64$) = "1")
-			Set $RegId$ = takeString(0, $ResultList64$)
-			Set $InstallDir$ = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] InstallPath")
-			Set $InstalledProductVersion$  = GetRegistryStringValue64("[" + $RegPathInfo$ + "\" + $RegId$ + "] VersionNumber")
-			Sub_install
-		endif
-		if (count($ResultList64$) > "1")
-			logError "Found more than one installation in the 64bit registry, there is something wrong."
-			isFatalError	
-		endif
-	endif
-endif
 
-[Sub_install]
-; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
-Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
-Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
-
-; der Pfad zu QGIS ändert sich wenn es eine LTR-Version ist
-if FileExists($InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat")
-	Set $PathToExe$ = $InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
-else
-	Set $PathToExe$ = $InstallDir$ + "\bin\qgis-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
-endif
-
-; verifiziert ob die Produktversion mit der installierten Version übereinstimmt
-if not ($InstalledProductVersion$ = $ProductVersion$)
-	logError "Fatal: Installed product version is " + $InstalledProductVersion$ + " but is supposed to be " + $ProductVersion$
-	isFatalError
-endif
-
-if $DesktopLink$ = "false"
-	comment "deleting desktop icons"
-	; speichert die ersten zwei Nummern der Produktversion
-	Set $MajorProductVersion$ = composeString (createStringList (takestring (0, splitString($InstalledProductVersion$, ".")), takestring (1, splitString($InstalledProductVersion$, "."))), ".")
+		if $DesktopLink$ = "false"
+			comment "deleting desktop icons"
+			; speichert die ersten zwei Nummern der Produktversion
+			Set $MajorProductVersion$ = composeString (createStringList (takestring (0, splitString($InstalledVersion$, ".")), takestring (1, splitString($InstalledVersion$, "."))), ".")
 	
-	; die Namen der Verknüpfungen werden hier definiert da die String-Konkatenation in der Linkfolder Section nicht funktioniert
-	Set $GGISShortcutName$ = "GRASS GIS " + $InstalledGGISVersion$
-	Set $QGISShortcutName$ = "QGIS " + $MajorProductVersion$
-	Linkfolder_deleteDefaultDesktopIcons
-endif
+			; die Namen der Verknüpfungen werden hier definiert da die String-Konkatenation in der Linkfolder Section nicht funktioniert
+			Set $GGISShortcutName$ = "GRASS GIS " + $InstalledGGISVersion$
+			Set $QGISShortcutName$ = "QGIS " + $MajorProductVersion$
+			Linkfolder_deleteDefaultDesktopIcons
+		endif
 
-comment "include custom post install file"
-set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
-if not ($CustomPostInstall$ = "none")
-	if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
-		include_insert "%ScriptPath%\custom\" + $CustomPostInstall$	
+		comment "include custom post install file"
+		set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+		if not ($CustomPostInstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+				include_insert "%ScriptPath%\custom\" + $CustomPostInstall$
+			endif
+		endif
 	endif
 endif
 

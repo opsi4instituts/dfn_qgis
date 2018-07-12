@@ -1,19 +1,17 @@
-requiredWinstVersion >= "4.11.4.3"
+requiredWinstVersion >= "4.12.0.16"
 
-Defvar $AltProductName$
-DefVar $AltSearchPattern$
 DefVar $CustomPostDeinstall$
 DefVar $CustomPostInstall$
 DefVar $DesktopLink$
 DefVar $DirForGrassVersion$
-DefVar $ErrorMsg$
+DefVar $ErrorString$
 DefVar $ExitCode$
 DefVar $GGISShortcutName$
 DefVar $InstFile$
 DefVar $InstSystemType$
 DefVar $InstallDir$
 DefVar $InstalledGGISVersion$
-DefVar $InstalledProductVersion$
+DefVar $InstalledVersion$
 DefVar $LogDir$
 DefVar $MajorProductVersion$
 DefVar $MinimumSpace$
@@ -24,19 +22,12 @@ DefVar $ProductName$
 DefVar $ProductVersion$
 DefVar $QGISShortcutName$
 DefVar $RegId$
-DefVar $RegPathUninstall$
-DefVar $RegPathInfo$
+DefVar $RegBitScope$
 DefVar $SearchPattern$
-DefVar $SearchRegPath$
 DefVar $UninstallProgram$
 DefVar $VersionSubFilePath$
 DefStringList $InstallDirs$
-DefStringlist $ResultList32$
-DefStringlist $ResultList64$
-
-include_append "section_sub_check_exitcode.opsiinc"
-include_append "section_sub_search_registry32_keys.opsiinc"
-include_append "section_sub_search_registry64_keys.opsiinc"
+DefStringlist $ResultList$
 
 Set $InstSystemType$ = GetSystemType
 Set $MSVersion$	 = GetMsVersionInfo
@@ -51,15 +42,15 @@ Set $DesktopLink$ = getProductProperty("desktop-link","false")
 ; ---------------------------------------------------------------------------------
 Set $ProductId$		= "dfn_qgis"
 Set $ProductName$       = "QGIS"
-Set $AltProductName$    = "Quantum GIS"
 Set $MinimumSpace$	= "1600 MB"
-Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-Set $RegPathInfo$       = "HKEY_LOCAL_MACHINE\SOFTWARE"
 Set $InstFile$		= "QGIS-OSGeo4W-" + $ProductVersion$ + "-1-Setup-x86_64.exe"
 ; ---------------------------------------------------------------------------------
 ; ---------------------------------------------------------------------------------
 
-setloglevel = 6
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript::isNsisExitcodeFatal"
+; Library registry search uninstall keys (local functions)
+importLib "func_search_registry_uninstall_keys.opsiinc"
 
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer if installation was successful on other windows versions."		

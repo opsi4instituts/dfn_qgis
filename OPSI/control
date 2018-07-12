@@ -1,7 +1,6 @@
 [Package]
 version: 1
 depends: 
-incremental: False
 
 [Product]
 type: localboot
@@ -9,7 +8,7 @@ id: dfn_qgis
 name: QGIS
 description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
 advice: 
-version: 2.18.20
+version: 2.18.21
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -52,41 +51,48 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
-dfn_qgis(2.18.20-1)
+dfn_qgis (2.18.21-1)
+	* neue Upstreamversion
+	* neue Registrysuche (https://github.com/opsi4instituts/lib)
+	* Suche nach altem Produktnamen (Quantum GIS) entfernt
+	* uib_exitcode library
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 11.07.2018
+
+dfn_qgis (2.18.20-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 22.05.2018
 
-dfn_qgis(2.18.19-1)
+dfn_qgis (2.18.19-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 26.04.2018
 
-dfn_qgis(2.18.18-1)
+dfn_qgis (2.18.18-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 10.04.2018
 
-dfn_qgis(2.18.17-2)
+dfn_qgis (2.18.17-2)
 	* bei der Pfadermittlung wird nun automatisch erkannt ob es sich um eine normale oder LTR Version handelt
  -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 09.04.2018
 
-dfn_qgis(2.18.17-1)
+dfn_qgis (2.18.17-1)
 	* neue Upstreamversion (Long-Term-Release = LTR)
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 27.02.2018
 
-dfn_qgis(2.18.16-1)
+dfn_qgis (2.18.16-1)
 	* neue Version gepackt und kleinen Fehler gefixt
  -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 05.02.2018
 
-dfn_qgis(2.18.14-1)
+dfn_qgis (2.18.14-1)
 	* neue Upstreamversion
 	* Logo gem. o4i-Richtlinie
 	* 64-Bit-Check: error statt warning
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 02.11.2017
 
-dfn_qgis(2.18.13-1)
+dfn_qgis (2.18.13-1)
 	* neue Version gepackt
  -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 23.10.2017
 
-dfn_qgis(2.18.12-1)
+dfn_qgis (2.18.12-1)
 	* Fixes und neue Version gepackt
  -- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 19.10.2017
 
