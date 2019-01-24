@@ -8,7 +8,7 @@ id: dfn_qgis
 name: QGIS
 description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
 advice: 
-version: 2.18.28
+version: 3.4.4
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -18,7 +18,7 @@ updateScript:
 alwaysScript: 
 onceScript: 
 customScript: 
-userLoginScript: login.opsiscript
+userLoginScript: 
 
 [ProductProperty]
 type: bool
@@ -51,6 +51,11 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_qgis (3.4.4-1)
+	* Testversion mit Wechsel auf 3.4 (neue LTR ab 3.4.5, siehe https://qgis.org/en/site/getinvolved/development/roadmap.html#release-schedule)
+	* login.opsiscript entfernt da mit 3.4 nicht mehr notwendig
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 23.01.2019
+
 dfn_qgis (2.18.28-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 22.01.2019

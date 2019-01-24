@@ -2,6 +2,7 @@
 *.opsi
 *.exe
 *.md5
+*.md5sum
 *.zsync
 custom
 orig
