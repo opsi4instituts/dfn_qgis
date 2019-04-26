@@ -3,7 +3,8 @@ requiredWinstVersion >= "4.12.0.16"
 DefVar $CustomPostDeinstall$
 DefVar $CustomPostInstall$
 DefVar $DesktopLink$
-DefVar $DirForGrassVersion$
+DefVar $DesktopLinkName$
+DefVar $DesktopLinkPath$
 DefVar $ErrorString$
 DefVar $ExitCode$
 DefVar $GGISShortcutName$
@@ -23,10 +24,9 @@ DefVar $ProductVersion$
 DefVar $QGISShortcutName$
 DefVar $RegId$
 DefVar $RegBitScope$
-DefVar $SearchPattern$
 DefVar $UninstallProgram$
-DefVar $VersionSubFilePath$
-DefStringList $InstallDirs$
+DefStringList $InstFileList$
+DefStringList $InstalledGGISVersionSplit$
 DefStringlist $ResultList$
 
 Set $InstSystemType$ = GetSystemType
@@ -34,23 +34,35 @@ Set $MSVersion$	 = GetMsVersionInfo
 Set $LogDir$ = "%opsiLogDir%"
 
 ; entfernt die Paketversionsnummer von der Gesamtversionsnummer
-Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"))
-
+Set $ProductVersion$ = takestring (0, splitString("%installingProdVersion%", "-"))
 Set $DesktopLink$ = getProductProperty("desktop-link","false")
 
 ; ---------------------------------------------------------------------------------
 ; ---------------------------------------------------------------------------------
 Set $ProductId$		= "dfn_qgis"
-Set $ProductName$       = "QGIS"
+Set $ProductName$   = "QGIS"
 Set $MinimumSpace$	= "1600 MB"
-Set $InstFile$		= "QGIS-OSGeo4W-" + $ProductVersion$ + "-1-Setup-x86_64.exe"
 ; ---------------------------------------------------------------------------------
 ; ---------------------------------------------------------------------------------
 
 ; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
 importLib "uib_exitcode.opsiscript::isNsisExitcodeFatal"
-; Library registry search uninstall keys (local functions)
-importLib "func_search_registry_uninstall_keys.opsiinc"
+; Library registry actions (local functions)
+importLib "lib_registry_functions.opsiinc::SearchRegistryUninstallKeys"
+; Library file actions (local functions)
+importLib "lib_file_functions.opsiinc::findFileNameFromPath"
+
+Set $InstFileList$ = findFilenameFromPath("QGIS-OSGeo4W-*Setup-x86_64.exe", "%ScriptPath%")
+; nur den letzten Treffer nehmen
+if not (count($InstFileList$) = "1")
+	LogError "Obviously the maintainer forgot to delete an old installer file!!!"
+	isFatalError
+endif
+Set $InstFile$ = takeString(-1,$InstFileList$)
+if not (contains($InstFile$, $ProductVersion$))
+	LogError "Can not find $ProductVersion$ in $InstFile$!!!"
+	isFatalError
+endif
 
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer if installation was successful on other windows versions."		

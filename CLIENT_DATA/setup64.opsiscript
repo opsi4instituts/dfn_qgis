@@ -40,10 +40,15 @@ else
 		Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
 		Set $InstalledVersion$ = GetRegistryValue($RegId$, "DisplayVersion", $RegBitScope$)
 
-		; speichert die Version des mitinstallierten Grass GIS nach Abfrage der Ordnerstruktur
-		Set $DirForGrassVersion$ = '"' + $InstallDir$ + '\apps\grass\"'
-		Set $InstalledGGISVersion$ =  getValueBySeparator("grass", "-", getOutStreamFromSection("DosInAnIcon_get_path $DirForGrassVersion$"))
-
+		; speichert die Version des mitinstallierten Grass GIS nach Abfrage des erstellten Desktop-Links
+		Set $DesktopLinkPath$ = takeString(0, findFileNameFromPath("GRASS*", "%CommonDesktopDir%"))
+		Set $DesktopLinkName$ = takeString(-1, splitString($DesktopLinkPath$, "\"))
+		Set $InstalledGGISVersionSplit$ = splitString(takeString(-1, splitStringOnWhiteSpace($DesktopLinkName$)), ".")
+		; der Name des Desktop Links beinhaltet als letztes zwar die Versionsnummer, am Ende ist aber noch die
+		; .lnk Dateiextension dabei, diese muss also weggeschnitten werden
+		Set $InstalledGGISVersionSplit$ = removeFromListByContaining("lnk", $InstalledGGISVersionSplit$)
+		Set $InstalledGGISVersion$ = composeString($InstalledGGISVersionSplit$, ".")
+		
 		; der Pfad zu QGIS ändert sich wenn es eine LTR-Version ist
 		if FileExists($InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat")
 			Set $PathToExe$ = $InstallDir$ + "\bin\qgis-ltr-grass" + takestring (0, splitString($InstalledGGISVersion$, ".")) + ".bat"
@@ -80,15 +85,11 @@ endif
 
 [Winbatch_install]
 ;NSIS Installer
-"%ScriptPath%\$InstFile$" /S
-
-[DosInAnIcon_get_path]
-@echo off
-dir %1 /B
+"$InstFile$" /S
 
 [Linkfolder_deleteDefaultDesktopIcons]
 set_basefolder common_desktopdirectory
 set_subfolder ""
-delete_element "OSGeo4W Shell"
 delete_element $GGISShortcutName$
 delete_subfolder $QGISShortcutName$
+

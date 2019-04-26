@@ -8,7 +8,7 @@ id: dfn_qgis
 name: QGIS
 description: Geoinformationssysteme 'QGIS' und 'Grass GIS' zum Betrachten, Bearbeiten und Auswerten von raster- und vektororientierten Geodaten [Geographic information systems 'QGIS' and 'Grass GIS' for viewing, editing and analysis of geospatial data]
 advice: 
-version: 3.4.5
+version: 3.4.7
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -51,6 +51,17 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_qgis (3.4.7-1)
+	* neue Upstreamversion
+	* automatisiertes Finden des InstFiles
+	* Änderung bei der Versionsermittlung von Grass GIS
+-- Francesco Ritt (archIT/KIT) <francesco.ritt9@kit.edu>, 26.04.2019
+
+dfn_qgis (3.4.6-1)
+	* neue Upstreamversion
+	* Check ob InstFile gefunden wird
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 01.04.2019
+
 dfn_qgis (3.4.5-1)
 	* neue Upstreamversion
  -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 26.02.2019

@@ -6,6 +6,8 @@ Set $ResultList$ = SearchRegistryUninstallKeys($ProductName$)
 if (count($ResultList$) = "0")
 	comment "No installations of " + $ProductName$ + " found in registry"
 else
+	Message "Uninstalling " + $ProductName$ + " ..."
+
 	Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
 	Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
 
